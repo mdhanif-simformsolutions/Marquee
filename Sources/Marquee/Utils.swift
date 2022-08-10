@@ -1,6 +1,6 @@
 //
 //  Utils.swift
-//  
+//
 //
 //  Created by CatchZeng on 2020/11/23.
 //
@@ -29,30 +29,39 @@ struct AlignmentKey: EnvironmentKey {
     static var defaultValue: HorizontalAlignment = .leading
 }
 
+struct BoundaryKey: EnvironmentKey {
+    static var defaultValue: MarqueeBoundary = .outer
+}
+
 extension EnvironmentValues {
     var marqueeDuration: Double {
         get {self[DurationKey.self]}
         set {self[DurationKey.self] = newValue}
     }
-    
+
     var marqueeAutoreverses: Bool {
         get {self[AutoreversesKey.self]}
         set {self[AutoreversesKey.self] = newValue}
     }
-    
+
     var marqueeDirection: MarqueeDirection {
         get {self[DirectionKey.self]}
         set {self[DirectionKey.self] = newValue}
     }
-    
+
     var marqueeWhenNotFit: Bool {
         get {self[StopWhenNotFitKey.self]}
         set {self[StopWhenNotFitKey.self] = newValue}
     }
-    
+
     var marqueeIdleAlignment: HorizontalAlignment {
         get {self[AlignmentKey.self]}
         set {self[AlignmentKey.self] = newValue}
+    }
+
+    var marqueeBoundary: MarqueeBoundary {
+        get {self[BoundaryKey.self]}
+        set {self[BoundaryKey.self] = newValue}
     }
 }
 
@@ -70,7 +79,7 @@ public extension View {
     func marqueeDuration(_ duration: Double) -> some View {
         environment(\.marqueeDuration, duration)
     }
-    
+
     /// Sets the marquee animation autoreverses to the given value.
     ///
     ///     Marquee {
@@ -84,7 +93,7 @@ public extension View {
     func marqueeAutoreverses(_ autoreverses: Bool) -> some View {
         environment(\.marqueeAutoreverses, autoreverses)
     }
-    
+
     /// Sets the marquee animation direction to the given value.
     ///
     ///     Marquee {
@@ -98,7 +107,7 @@ public extension View {
     func marqueeDirection(_ direction: MarqueeDirection) -> some View {
         environment(\.marqueeDirection, direction)
     }
-    
+
     /// Stop the marquee animation when the content view is not fit`(contentWidth < marqueeWidth)`.
     ///
     ///     Marquee {
@@ -112,7 +121,7 @@ public extension View {
     func marqueeWhenNotFit(_ stopWhenNotFit: Bool) -> some View {
         environment(\.marqueeWhenNotFit, stopWhenNotFit)
     }
-    
+
     /// Sets the marquee alignment  when idle(stop animation).
     ///
     ///     Marquee {
@@ -125,6 +134,20 @@ public extension View {
     /// - Returns: A view that has the given value set in its environment.
     func marqueeIdleAlignment(_ alignment: HorizontalAlignment) -> some View {
         environment(\.marqueeIdleAlignment, alignment)
+    }
+
+    /// Sets the marquee boundaries to the given value
+    ///
+    ///     Marquee {
+    ///         Text("Hello World!")
+    ///     }.marqueeBoundary(.inner)
+    ///
+    /// - Parameters:
+    ///   - boundary: Boundary when the animation will be finished. See `MarqueeBoundary` for possible values, default is `.outer`.
+    ///
+    /// - Returns: A view that has the given value set in its environment.
+    func marqueeBoundary(_ boundary: MarqueeBoundary) -> some View {
+        environment(\.marqueeBoundary, boundary)
     }
 }
 
@@ -166,7 +189,7 @@ extension View {
 
 struct _OffsetEffect: GeometryEffect {
     var offset: CGSize
-    
+
     var animatableData: CGSize.AnimatableData {
         get { CGSize.AnimatableData(offset.width, offset.height) }
         set { offset = CGSize(width: newValue.first, height: newValue.second) }
