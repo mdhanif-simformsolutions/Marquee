@@ -13,6 +13,10 @@ struct DurationKey: EnvironmentKey {
     static var defaultValue: Double = 2.0
 }
 
+struct DelayKey: EnvironmentKey {
+    static var defaultValue: Double = 3.0
+}
+
 struct AutoreversesKey: EnvironmentKey {
     static var defaultValue: Bool = false
 }
@@ -33,10 +37,19 @@ struct BoundaryKey: EnvironmentKey {
     static var defaultValue: MarqueeBoundary = .outer
 }
 
+struct FixedSizeKey: EnvironmentKey {
+    static var defaultValue: Bool = true
+}
+
 extension EnvironmentValues {
     var marqueeDuration: Double {
         get {self[DurationKey.self]}
         set {self[DurationKey.self] = newValue}
+    }
+
+    var marqueeDelay: Double {
+        get {self[DelayKey.self]}
+        set {self[DelayKey.self] = newValue}
     }
 
     var marqueeAutoreverses: Bool {
@@ -63,6 +76,11 @@ extension EnvironmentValues {
         get {self[BoundaryKey.self]}
         set {self[BoundaryKey.self] = newValue}
     }
+
+    var marqueeFixedSize: Bool {
+        get {self[FixedSizeKey.self]}
+        set {self[FixedSizeKey.self] = newValue}
+    }
 }
 
 public extension View {
@@ -78,6 +96,20 @@ public extension View {
     /// - Returns: A view that has the given value set in its environment.
     func marqueeDuration(_ duration: Double) -> some View {
         environment(\.marqueeDuration, duration)
+    }
+
+    /// Sets the marquee animation delay to the given value.
+    ///
+    ///     Marquee {
+    ///         Text("Hello World!")
+    ///     }.marqueeDelay(5.0)
+    ///
+    /// - Parameters:
+    ///   - delay: Animation delay, default is `3.0`.
+    ///
+    /// - Returns: A view that has the given value set in its environment.
+    func marqueeDelay(_ delay: Double) -> some View {
+        environment(\.marqueeDelay, delay)
     }
 
     /// Sets the marquee animation autoreverses to the given value.
@@ -149,6 +181,21 @@ public extension View {
     func marqueeBoundary(_ boundary: MarqueeBoundary) -> some View {
         environment(\.marqueeBoundary, boundary)
     }
+
+    /// Specify if the `.fixedSize` modifier should be applied to the internally used `GeometryReader`.
+    /// There might be some occasions where this is not wanted and could result in unexpected layout issues.
+    ///
+    ///     Marquee {
+    ///         Text("Hello World!")
+    ///     }.marqueeFixedSize(false)
+    ///
+    /// - Parameters:
+    ///   - fixedSize: Specify if the `.fixedSize` modifier should be applied to the internally used `GeometryReader`, default is `true`.
+    ///
+    /// - Returns: A view that has the given value set in its environment.
+    func marqueeFixedSize(_ fixedSize: Bool) -> some View {
+        environment(\.marqueeFixedSize, fixedSize)
+    }
 }
 
 struct GeometryBackground: View {
@@ -197,5 +244,20 @@ struct _OffsetEffect: GeometryEffect {
 
     public func effectValue(size: CGSize) -> ProjectionTransform {
         return ProjectionTransform(CGAffineTransform(translationX: offset.width, y: offset.height))
+    }
+}
+
+extension View {
+    /// Applies the given transform if the given condition evaluates to `true`.
+    /// - Parameters:
+    ///   - condition: The condition to evaluate.
+    ///   - transform: The transform to apply to the source `View`.
+    /// - Returns: Either the original `View` or the modified `View` if the condition is `true`.
+    @ViewBuilder func `if`<Content: View>(_ condition: Bool, transform: (Self) -> Content) -> some View {
+        if condition {
+            transform(self)
+        } else {
+            self
+        }
     }
 }
